@@ -1,6 +1,7 @@
 import { useFieldArray } from "react-hook-form";
 import type { UseFormReturn } from "react-hook-form";
-import type { ProjectCharterFormData } from "../types/charter";
+import type { ProjectCharterFormData } from "./types/charter";
+import { v4 as uuidv4 } from 'uuid'
 import {
   TextInput,
   Textarea,
@@ -266,7 +267,7 @@ export function StepHitos({ form }: FormProps) {
 
       <AddButton
         label="Agregar hito"
-        onClick={() => append({ id: crypto.randomUUID(), name: "", scheduledDate: "" })}
+        onClick={() => append({ id: uuidv4(), name: "", scheduledDate: "" })}
       />
     </div>
   );

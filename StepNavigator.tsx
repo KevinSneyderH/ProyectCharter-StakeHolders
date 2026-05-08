@@ -1,4 +1,5 @@
-import type { StepId, FormStep } from "../types/charter";
+import type { StepId, FormStep } from "./types/charter";
+
 
 interface StepNavigatorProps {
   steps: FormStep[];

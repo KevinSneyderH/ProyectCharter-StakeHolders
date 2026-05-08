@@ -1,6 +1,7 @@
 import { useFieldArray } from "react-hook-form";
 import type { UseFormReturn } from "react-hook-form";
-import type { ProjectCharterFormData } from "../types/charter";
+import type { ProjectCharterFormData } from "./types/charter";
+import { v4 as uuidv4 } from 'uuid'
 import {
   TextInput,
   Textarea,
@@ -136,7 +137,7 @@ export function StepVersiones({ form }: FormProps) {
         label="Agregar versión"
         onClick={() =>
           append({
-            id: crypto.randomUUID(),
+            id: uuidv4(),
             version: "",
             madeBy: "",
             reviewedBy: "",

@@ -1,6 +1,7 @@
 import { useFieldArray } from "react-hook-form";
 import type { UseFormReturn } from "react-hook-form";
-import type { ProjectCharterFormData } from "../types/charter";
+import type { ProjectCharterFormData } from "./types/charter";
+import { v4 as uuidv4 } from 'uuid'
 import {
   TextInput,
   Textarea,
@@ -61,7 +62,7 @@ export function StepOrganizaciones({ form }: FormProps) {
 
       <AddButton
         label="Agregar organización"
-        onClick={() => append({ id: crypto.randomUUID(), nameOrGroup: "", role: "" })}
+        onClick={() => append({ id: uuidv4(), nameOrGroup: "", role: "" })}
       />
     </div>
   );
@@ -155,13 +156,13 @@ export function StepRiesgos({ form }: FormProps) {
         <AddButton
           label="Agregar amenaza"
           onClick={() =>
-            append({ id: crypto.randomUUID(), type: "amenaza", description: "" })
+            append({ id: uuidv4(), type: "amenaza", description: "" })
           }
         />
         <AddButton
           label="Agregar oportunidad"
           onClick={() =>
-            append({ id: crypto.randomUUID(), type: "oportunidad", description: "" })
+            append({ id: uuidv4(), type: "oportunidad", description: "" })
           }
         />
       </div>

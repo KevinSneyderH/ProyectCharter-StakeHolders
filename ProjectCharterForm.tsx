@@ -2,8 +2,8 @@ import { useState, useCallback, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
-import type { ProjectCharterFormData, StepId } from "./charter";
-import { FORM_STEPS, DEFAULT_FORM_VALUES } from "./charter";
+import type { ProjectCharterFormData, StepId } from "./types/charter";
+import { FORM_STEPS, DEFAULT_FORM_VALUES } from "./types/charter";
 import { charterSchema, stepSchemas } from "./charterSchema";
 import { useCharterAutosave, loadDraft } from "./useCharterAutosave";
 
