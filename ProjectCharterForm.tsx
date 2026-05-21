@@ -2,6 +2,11 @@ import { useState, useCallback, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
+import NavBar from "./NavBar";
+
+import { me, logout } from "./src/api/auth";
+import { useNavigate } from "react-router-dom";
+
 import type { ProjectCharterFormData, StepId } from "./types/charter";
 import { FORM_STEPS, DEFAULT_FORM_VALUES } from "./types/charter";
 import { charterSchema, stepSchemas } from "./charterSchema";
@@ -28,20 +33,28 @@ import {
 
 // ─── API submission helper ────────────────────────────────────────────────────
 
-async function submitCharter(data: ProjectCharterFormData): Promise<{ id: string }> {
-  const response = await fetch("/api/submissions", {
+async function submitCharter(
+  data: ProjectCharterFormData
+): Promise<any> {
+
+  const token = localStorage.getItem("token");
+
+  const response = await fetch("/api/charters", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
       Accept: "application/json",
-      // Authorization: `Bearer ${token}` ← add when Sanctum is wired
+      Authorization: `Bearer ${token}`,
     },
-    body: JSON.stringify({ type: "project_charter", data }),
+    body: JSON.stringify(data),
   });
 
   if (!response.ok) {
     const err = await response.json().catch(() => ({}));
-    throw new Error(err?.message ?? "Error al enviar el formulario");
+
+    throw new Error(
+      err?.message ?? "Error al enviar el formulario"
+    );
   }
 
   return response.json();
@@ -71,6 +84,8 @@ export function ProjectCharterForm() {
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [lastSaved, setLastSaved] = useState<string | null>(null);
   const [draftLoaded, setDraftLoaded] = useState(false);
+  const [userName, setUserName] = useState("");
+  const navigate = useNavigate();
 
   const form = useForm<ProjectCharterFormData>({
     resolver: zodResolver(charterSchema),
@@ -80,6 +95,21 @@ export function ProjectCharterForm() {
 
   const { watch, handleSubmit, reset, trigger, getValues } = form;
   const formData = watch();
+
+  useEffect(() => {
+    const loadUser = async () => {
+      try {
+        const user = await me();
+
+        setUserName(user.name);
+      } catch (error) {
+        localStorage.removeItem("token");
+        navigate("/login");
+      }
+    };
+
+    loadUser();
+  }, [navigate]);
 
   // Load draft on mount
   useEffect(() => {
@@ -205,22 +235,7 @@ export function ProjectCharterForm() {
       </div>
 
       {/* Top bar */}
-      <header className="sticky top-0 z-20 bg-white/95 backdrop-blur-md border-b border-neutral-200 shadow-sm">
-        <div className="container-responsive py-4 flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-600 to-blue-700 flex items-center justify-center shadow-md">
-              <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-              </svg>
-            </div>
-            <div className="hidden sm:block">
-              <p className="text-sm font-bold text-neutral-900">Project Charter</p>
-              <p className="text-xs text-neutral-500">{currentStepMeta.label}</p>
-            </div>
-          </div>
-          <AutosaveIndicator savedAt={lastSaved} />
-        </div>
-      </header>
+      <NavBar userName={userName} userRole="student" />
 
       <div className="container-responsive py-8">
         <div className="flex gap-8">

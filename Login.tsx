@@ -13,10 +13,13 @@ export default function Login() {
         setLoading(true);
 
         try {
-            await login(email, password);
+            const result = await login(email, password);
 
-            // 🔥 después del login
-            window.location.href = "/"; // o dashboard
+            if (result.user.role === "professor") {
+                window.location.href = "/professor";
+            } else {
+                window.location.href = "/";
+            } // o dashboard
         } catch (err: any) {
             setError("Credenciales inválidas o error en el servidor");
         } finally {
@@ -25,36 +28,46 @@ export default function Login() {
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-gray-100">
+        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-neutral-50 to-neutral-100 px-4">
             <form
                 onSubmit={handleSubmit}
-                className="bg-white p-6 rounded-xl shadow-md w-full max-w-sm space-y-4"
+                className="card p-8 w-full max-w-md space-y-6"
             >
-                <h1 className="text-xl font-bold">Login</h1>
+                <div className="space-y-2">
+                    <p className="text-sm font-semibold text-blue-600 uppercase tracking-[0.24em]">
+                        Bienvenido de nuevo
+                    </p>
+                    <h1 className="text-3xl font-bold text-neutral-900">Iniciar sesión</h1>
+                    <p className="text-sm text-neutral-600">
+                        Accede a tu panel y continúa con tu Project Charter.
+                    </p>
+                </div>
 
-                <input
-                    type="email"
-                    placeholder="Email"
-                    className="w-full border p-2 rounded"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                />
+                <div className="space-y-4">
+                    <input
+                        type="email"
+                        placeholder="Email"
+                        className="input-field"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                    />
 
-                <input
-                    type="password"
-                    placeholder="Password"
-                    className="w-full border p-2 rounded"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                />
+                    <input
+                        type="password"
+                        placeholder="Password"
+                        className="input-field"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                    />
+                </div>
 
-                {error && <p className="text-red-500 text-sm">{error}</p>}
+                {error && <p className="text-red-600 text-sm">{error}</p>}
 
                 <button
                     disabled={loading}
-                    className="w-full bg-blue-600 text-white p-2 rounded"
+                    className="btn-primary w-full"
                 >
-                    {loading ? "Ingresando..." : "Login"}
+                    {loading ? "Ingresando..." : "Entrar"}
                 </button>
             </form>
         </div>
