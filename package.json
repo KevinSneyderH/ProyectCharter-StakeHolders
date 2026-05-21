@@ -4,10 +4,10 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "dev": "bun vite",
-    "build": "bun tsc -b && bun vite build",
-    "preview": "bun vite preview",
-    "lint": "bun eslint ."
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "lint": "eslint ."
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
