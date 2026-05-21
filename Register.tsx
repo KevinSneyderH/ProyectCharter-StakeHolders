@@ -1,9 +1,12 @@
 import { useState } from "react";
-import { login } from "./src/api/auth";
 
-export default function Login() {
+export default function Register() {
+    const [name, setName] = useState("");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+    const [confirmPassword, setConfirmPassword] = useState("");
+    const [role, setRole] = useState<"student" | "professor">("student");
+
     const [error, setError] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
 
@@ -13,15 +16,36 @@ export default function Login() {
         setLoading(true);
 
         try {
-            const result = await login(email, password);
+            const res = await fetch("/api/auth/register", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    Accept: "application/json",
+                },
+                body: JSON.stringify({
+                    name,
+                    email,
+                    password,
+                    password_confirmation: confirmPassword,
+                    role,
+                }),
+            });
 
-            if (result.user.role === "professor") {
+            const result = await res.json();
+
+            if (!res.ok) {
+                throw new Error(result.message || "Error al registrar usuario");
+            }
+
+            // 👇 igual que login: redirección por rol
+            if (result.user?.role === "professor") {
                 window.location.href = "/professor";
             } else {
                 window.location.href = "/";
             }
+
         } catch (err: any) {
-            setError("Credenciales inválidas o error en el servidor");
+            setError(err.message || "Error en el servidor");
         } finally {
             setLoading(false);
         }
@@ -38,17 +62,26 @@ export default function Login() {
                 >
                     <div className="space-y-2">
                         <p className="text-sm font-semibold text-blue-600 uppercase tracking-[0.24em]">
-                            Bienvenido de nuevo
+                            Crear cuenta
                         </p>
                         <h1 className="text-3xl font-bold text-neutral-900">
-                            Iniciar sesión
+                            Registro
                         </h1>
                         <p className="text-sm text-neutral-600">
-                            Accede a tu panel y continúa con tu Project Charter.
+                            Crea tu cuenta para usar Project Charter.
                         </p>
                     </div>
 
                     <div className="space-y-4">
+
+                        <input
+                            type="text"
+                            placeholder="Nombre"
+                            className="input-field"
+                            value={name}
+                            onChange={(e) => setName(e.target.value)}
+                        />
+
                         <input
                             type="email"
                             placeholder="Email"
@@ -64,6 +97,25 @@ export default function Login() {
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
                         />
+
+                        <input
+                            type="password"
+                            placeholder="Confirm password"
+                            className="input-field"
+                            value={confirmPassword}
+                            onChange={(e) => setConfirmPassword(e.target.value)}
+                        />
+
+                        <select
+                            className="input-field"
+                            value={role}
+                            onChange={(e) =>
+                                setRole(e.target.value as "student")
+                            }
+                        >
+                            <option value="student">Student</option>
+                        </select>
+
                     </div>
 
                     {error && (
@@ -74,16 +126,18 @@ export default function Login() {
                         disabled={loading}
                         className="btn-primary w-full"
                     >
-                        {loading ? "Ingresando..." : "Entrar"}
+                        {loading ? "Creando cuenta..." : "Registrarse"}
                     </button>
                 </form>
+
+                {/* 👇 igual que login */}
                 <p className="text-sm text-center mt-4 text-neutral-600">
-                    ¿No te has registrado?{" "}
+                    ¿Ya tienes cuenta?{" "}
                     <a
-                        href="/register"
+                        href="/login"
                         className="text-blue-600 font-medium hover:underline"
                     >
-                        Regístrate
+                        Inicia sesión
                     </a>
                 </p>
 
