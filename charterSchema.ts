@@ -99,8 +99,8 @@ export const fasesStepSchema = z
     validateSavedPhases(data.phases ?? [], ctx);
   });
 
-export const charterSchema = z
-  .object({
+/** Esquema base sin refinements — necesario para `.pick()` en pasos (Zod 4). */
+export const charterSchemaBase = z.object({
   projectName: z.string().min(5, "El nombre del proyecto debe tener al menos 5 caracteres"),
   projectAcronym: z.string().min(1, "Las siglas son requeridas").max(20, "Máximo 20 caracteres"),
 
@@ -137,45 +137,46 @@ export const charterSchema = z
   sponsorCompany: z.string().min(2, "La empresa del sponsor es requerida"),
   sponsorPosition: z.string().min(3, "El cargo del sponsor es requerido"),
   sponsorDate: z.string().min(1, "La fecha de autorización es requerida"),
-})
-  .superRefine((data, ctx) => {
-    validateSavedPhases(data.phases ?? [], ctx);
-  });
+});
+
+export const charterSchema = charterSchemaBase.superRefine((data, ctx) => {
+  validateSavedPhases(data.phases ?? [], ctx);
+});
 
 export type CharterSchema = z.infer<typeof charterSchema>;
 
-// Step-level validation subsets
+// Step-level validation subsets (pick solo sobre el esquema base)
 export const stepSchemas: Record<string, z.ZodType> = {
-  identificacion: charterSchema.pick({ projectName: true, projectAcronym: true }),
-  versiones: charterSchema.pick({ versions: true }),
-  descripcion: charterSchema.pick({
+  identificacion: charterSchemaBase.pick({ projectName: true, projectAcronym: true }),
+  versiones: charterSchemaBase.pick({ versions: true }),
+  descripcion: charterSchemaBase.pick({
     generalDescription: true,
     location: true,
     duration: true,
   }),
-  producto: charterSchema.pick({
+  producto: charterSchemaBase.pick({
     productDefinition: true,
     solutionArchitecture: true,
   }),
   fases: fasesStepSchema,
-  requisitos: charterSchema.pick({
+  requisitos: charterSchemaBase.pick({
     sponsorRequirements: true,
     clientRequirements: true,
     functionalRequirements: true,
     nonFunctionalRequirements: true,
     qualityRequirements: true,
   }),
-  objetivos: charterSchema.pick({ objectives: true }),
-  pm: charterSchema.pick({
+  objetivos: charterSchemaBase.pick({ objectives: true }),
+  pm: charterSchemaBase.pick({
     pmName: true,
     pmReportsTo: true,
     pmAuthority: true,
     pmSupervises: true,
   }),
-  hitos: charterSchema.pick({ milestones: true }),
-  organizaciones: charterSchema.pick({ organizations: true }),
-  riesgos: charterSchema.pick({ risks: true }),
-  presupuesto: charterSchema.pick({
+  hitos: charterSchemaBase.pick({ milestones: true }),
+  organizaciones: charterSchemaBase.pick({ organizations: true }),
+  riesgos: charterSchemaBase.pick({ risks: true }),
+  presupuesto: charterSchemaBase.pick({
     totalBudget: true,
     sponsorName: true,
     sponsorCompany: true,

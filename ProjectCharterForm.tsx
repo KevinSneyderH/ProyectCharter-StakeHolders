@@ -102,7 +102,7 @@ export function ProjectCharterForm() {
     mode: "onChange",
   });
 
-  const { watch, handleSubmit, reset, trigger, getValues } = form;
+  const { watch, handleSubmit, reset, trigger, getValues, setValue } = form;
   const formData = watch();
 
   useEffect(() => {

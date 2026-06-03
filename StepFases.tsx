@@ -16,6 +16,7 @@ import {
   serializePhases,
 } from "./phasesUtils";
 import { RemoveButton } from "./FieldComponents";
+import { PhaseCronograma } from "./PhaseCronograma";
 
 type FormProps = { form: UseFormReturn<ProjectCharterFormData> };
 
@@ -87,59 +88,6 @@ function formatDate(value: string) {
     month: "short",
     year: "numeric",
   });
-}
-
-// ─── Cronograma (vista por fechas) ───────────────────────────────────────────
-
-function CronogramaView({ phases }: { phases: ProjectPhase[] }) {
-  const sorted = [...phases].sort((a, b) => a.startDate.localeCompare(b.startDate));
-
-  if (sorted.length === 0) {
-    return (
-      <div className="card p-10 text-center">
-        <MaterialIcon name="calendar_month" className="text-4xl text-neutral-300 mb-3" />
-        <p className="text-neutral-600 font-medium">No hay fases para mostrar en el cronograma</p>
-      </div>
-    );
-  }
-
-  return (
-    <div className="card p-6 space-y-0">
-      <div className="relative pl-8 border-l-2 border-blue-200 space-y-8">
-        {sorted.map((phase, i) => {
-          const progress = computePhaseProgress(phase.deliverables);
-          const styles = PHASE_STATUS_STYLES[phase.status];
-          return (
-            <div key={phase.id} className="relative">
-              <span
-                className={`absolute -left-[2.125rem] top-1 flex h-7 w-7 items-center justify-center rounded-full border-2 border-white text-[11px] font-bold text-white shadow-sm ${styles.progress}`}
-                aria-hidden
-              >
-                {i + 1}
-              </span>
-              <div className="rounded-xl border border-neutral-200 bg-neutral-50 p-4">
-                <div className="flex flex-wrap items-start justify-between gap-3">
-                  <div className="min-w-0 flex-1">
-                    <h4 className="font-bold text-neutral-900 truncate" title={phase.title}>
-                      {phase.title}
-                    </h4>
-                    <p className="text-sm text-neutral-500 mt-1">
-                      {formatDate(phase.startDate)} – {formatDate(phase.endDate)}
-                    </p>
-                  </div>
-                  <span className={`status-pill ${styles.pill}`}>{PHASE_STATUS_LABELS[phase.status]}</span>
-                </div>
-                <div className="mt-3 h-1.5 w-full bg-neutral-200 rounded-full overflow-hidden">
-                  <div className={`h-full rounded-full ${styles.progress}`} style={{ width: `${progress}%` }} />
-                </div>
-                <p className="text-xs text-neutral-500 mt-2">{progress}% · {phase.deliverables.length} entregables</p>
-              </div>
-            </div>
-          );
-        })}
-      </div>
-    </div>
-  );
 }
 
 // ─── Vista de solo lectura (fases guardadas / en borrador) ─────────────────────
@@ -677,7 +625,10 @@ export function StepFases({ form }: FormProps) {
 
         <div className="space-y-6">
           {showCronograma ? (
-            <CronogramaView phases={savedPhases} />
+            <PhaseCronograma
+              phases={savedPhases}
+              onClose={() => setShowCronograma(false)}
+            />
           ) : savedPhaseEntries.length === 0 ? (
             <div className="card p-10 text-center">
               <MaterialIcon name="layers" className="text-4xl text-neutral-300 mb-3" />
