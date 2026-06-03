@@ -202,7 +202,7 @@ export function StepProducto({ form }: FormProps) {
     <div className="space-y-6">
       <SectionHeading
         title="Definición del Producto del Proyecto"
-        description="Descripción del producto, servicio o capacidad a generar, incluyendo arquitectura, fases y entregables."
+        description="Descripción del producto, servicio o capacidad a generar e incluye la arquitectura de la solución."
       />
 
       <Textarea
@@ -223,16 +223,6 @@ export function StepProducto({ form }: FormProps) {
         error={errors.solutionArchitecture}
         hint="Describe los componentes técnicos, plataformas, integraciones y módulos de la solución."
         {...register("solutionArchitecture")}
-      />
-
-      <Textarea
-        label="Fases del proyecto y entregables"
-        placeholder="Fase 1 - Planificación (duración: X semanas): Entregable: ...&#10;Fase 2 - Desarrollo (duración: X semanas): Entregable: ..."
-        rows={6}
-        required
-        error={errors.projectPhases}
-        hint="Lista cada fase con su duración estimada y el entregable asociado."
-        {...register("projectPhases")}
       />
     </div>
   );

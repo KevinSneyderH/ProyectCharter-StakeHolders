@@ -19,6 +19,8 @@ import {
   StepDescripcion,
   StepProducto,
 } from "./Steps1to4";
+import { StepFases } from "./StepFases";
+import { getSavedPhases, serializePhases } from "./phasesUtils";
 import {
   StepRequisitos,
   StepObjetivos,
@@ -39,6 +41,13 @@ async function submitCharter(
 
   const token = localStorage.getItem("token");
 
+  const savedPhases = getSavedPhases(data.phases ?? []);
+  const payload = {
+    ...data,
+    phases: savedPhases,
+    projectPhases: serializePhases(savedPhases),
+  };
+
   const response = await fetch("/api/charters", {
     method: "POST",
     headers: {
@@ -46,7 +55,7 @@ async function submitCharter(
       Accept: "application/json",
       Authorization: `Bearer ${token}`,
     },
-    body: JSON.stringify(data),
+    body: JSON.stringify(payload),
   });
 
   if (!response.ok) {
@@ -132,6 +141,12 @@ export function ProjectCharterForm() {
   const currentStepIndex = FORM_STEPS.findIndex((s) => s.id === currentStep);
 
   const validateCurrentStep = useCallback(async () => {
+    if (currentStep === "fases") {
+      const saved = getSavedPhases(getValues().phases ?? []);
+      setValue("phases", saved);
+      setValue("projectPhases", serializePhases(saved));
+    }
+
     const schema = stepSchemas[currentStep];
     if (!schema) return true;
 
@@ -141,7 +156,7 @@ export function ProjectCharterForm() {
 
     await trigger();
     return false;
-  }, [currentStep, getValues, trigger]);
+  }, [currentStep, getValues, setValue, trigger]);
 
   const goToStep = useCallback((stepId: StepId) => {
     setCurrentStep(stepId);
@@ -214,6 +229,7 @@ export function ProjectCharterForm() {
     versiones: <StepVersiones form={form} />,
     descripcion: <StepDescripcion form={form} />,
     producto: <StepProducto form={form} />,
+    fases: <StepFases form={form} />,
     requisitos: <StepRequisitos form={form} />,
     objetivos: <StepObjetivos form={form} />,
     pm: <StepPM form={form} />,
@@ -268,7 +284,11 @@ export function ProjectCharterForm() {
 
             <form onSubmit={handleSubmit(onSubmit)} noValidate>
               {/* Step panel */}
-              <div className="card-elevated p-6 md:p-8 mb-6">
+              <div
+                className={`card-elevated p-6 md:p-8 mb-6 ${
+                  currentStep === "fases" ? "relative overflow-hidden isolate" : ""
+                }`}
+              >
                 {stepComponentMap[currentStep]}
               </div>
 

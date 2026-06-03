@@ -1,4 +1,6 @@
 import { z } from "zod";
+import type { ProjectPhase } from "./types/charter";
+import { getSavedPhases, serializePhases } from "./phasesUtils";
 
 const versionSchema = z.object({
   id: z.string(),
@@ -34,7 +36,71 @@ const riskSchema = z.object({
   description: z.string().min(10, "Describe el riesgo con detalle"),
 });
 
-export const charterSchema = z.object({
+const phaseDeliverableSchema = z.object({
+  id: z.string(),
+  name: z.string().min(1, "El nombre del entregable es requerido"),
+  responsible: z.string().min(1, "El responsable es requerido"),
+  dueDate: z.string().min(1, "La fecha de compromiso es requerida"),
+  priority: z.enum(["alta", "media", "baja", "critica"]),
+  status: z.enum(["pendiente", "en-revision", "entregado", "finalizado"]),
+});
+
+export const projectPhaseSchema = z.object({
+  id: z.string(),
+  title: z.string().min(3, "El título de la fase es requerido"),
+  description: z.string().min(10, "Describe la fase con más detalle"),
+  startDate: z.string().min(1, "La fecha de inicio es requerida"),
+  endDate: z.string().min(1, "La fecha de fin es requerida"),
+  responsiblesCount: z.number().min(1, "Indica al menos un responsable"),
+  status: z.enum(["pending", "in-progress", "completed", "delayed"]),
+  progress: z.number().min(0).max(100),
+  deliverables: z.array(phaseDeliverableSchema).min(1, "Agrega al menos un entregable"),
+});
+
+function validateSavedPhases(phases: ProjectPhase[], ctx: z.RefinementCtx) {
+  const saved = getSavedPhases(phases);
+
+  if (saved.length === 0) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: "Agrega y guarda al menos una fase con el botón Actualizar",
+      path: ["phases"],
+    });
+    return;
+  }
+
+  saved.forEach((phase, index) => {
+    const result = projectPhaseSchema.safeParse(phase);
+    if (!result.success) {
+      result.error.issues.forEach((issue) => {
+        ctx.addIssue({
+          ...issue,
+          path: ["phases", index, ...(issue.path ?? [])],
+        });
+      });
+    }
+  });
+
+  if (serializePhases(saved).length < 30) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: "Describe las fases del proyecto",
+      path: ["projectPhases"],
+    });
+  }
+}
+
+export const fasesStepSchema = z
+  .object({
+    phases: z.array(z.custom<ProjectPhase>()),
+    projectPhases: z.string().optional(),
+  })
+  .superRefine((data, ctx) => {
+    validateSavedPhases(data.phases ?? [], ctx);
+  });
+
+export const charterSchema = z
+  .object({
   projectName: z.string().min(5, "El nombre del proyecto debe tener al menos 5 caracteres"),
   projectAcronym: z.string().min(1, "Las siglas son requeridas").max(20, "Máximo 20 caracteres"),
 
@@ -46,7 +112,8 @@ export const charterSchema = z.object({
 
   productDefinition: z.string().min(50, "Define el producto con más detalle"),
   solutionArchitecture: z.string().min(30, "Describe la arquitectura de la solución"),
-  projectPhases: z.string().min(30, "Describe las fases del proyecto"),
+  phases: z.array(z.custom<ProjectPhase>()),
+  projectPhases: z.string().optional(),
 
   sponsorRequirements: z.string().min(10, "Los requisitos del sponsor son requeridos"),
   clientRequirements: z.string().min(10, "Los requisitos del cliente son requeridos"),
@@ -70,7 +137,10 @@ export const charterSchema = z.object({
   sponsorCompany: z.string().min(2, "La empresa del sponsor es requerida"),
   sponsorPosition: z.string().min(3, "El cargo del sponsor es requerido"),
   sponsorDate: z.string().min(1, "La fecha de autorización es requerida"),
-});
+})
+  .superRefine((data, ctx) => {
+    validateSavedPhases(data.phases ?? [], ctx);
+  });
 
 export type CharterSchema = z.infer<typeof charterSchema>;
 
@@ -86,8 +156,8 @@ export const stepSchemas: Record<string, z.ZodType> = {
   producto: charterSchema.pick({
     productDefinition: true,
     solutionArchitecture: true,
-    projectPhases: true,
   }),
+  fases: fasesStepSchema,
   requisitos: charterSchema.pick({
     sponsorRequirements: true,
     clientRequirements: true,

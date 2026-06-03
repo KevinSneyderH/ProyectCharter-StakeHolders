@@ -242,7 +242,60 @@ export default function CharterDetailGod() {
 
                         <section className="card p-6" id="phases">
                             <h2 className="text-2xl font-semibold text-neutral-900 mb-3">Fases</h2>
-                            <pre className="whitespace-pre-wrap text-sm text-neutral-700">{charter.project_phases ?? charter.projectPhases}</pre>
+                            {Array.isArray(charter.phases) && charter.phases.length > 0 ? (
+                                <div className="space-y-4">
+                                    {charter.phases.map((phase: {
+                                        id: number;
+                                        title: string;
+                                        description?: string;
+                                        startDate?: string;
+                                        start_date?: string;
+                                        endDate?: string;
+                                        end_date?: string;
+                                        status: string;
+                                        progress: number;
+                                        deliverables?: Array<{
+                                            name: string;
+                                            responsible: string;
+                                            dueDate?: string;
+                                            due_date?: string;
+                                            priority: string;
+                                            status: string;
+                                        }>;
+                                    }) => (
+                                        <div key={phase.id} className="rounded-xl border border-neutral-200 p-4 space-y-3">
+                                            <div className="flex flex-wrap items-center justify-between gap-2">
+                                                <h3 className="font-bold text-neutral-900">{phase.title}</h3>
+                                                <span className="text-xs font-semibold uppercase text-neutral-500">
+                                                    {phase.status} · {phase.progress}%
+                                                </span>
+                                            </div>
+                                            {phase.description && (
+                                                <p className="text-sm text-neutral-600">{phase.description}</p>
+                                            )}
+                                            <p className="text-xs text-neutral-500">
+                                                {(phase.startDate ?? phase.start_date) ?? "—"} – {(phase.endDate ?? phase.end_date) ?? "—"}
+                                            </p>
+                                            {phase.deliverables && phase.deliverables.length > 0 && (
+                                                <ul className="text-sm text-neutral-700 space-y-1 border-t border-neutral-100 pt-3">
+                                                    {phase.deliverables.map((d, i) => (
+                                                        <li key={i}>
+                                                            <span className="font-medium">{d.name}</span>
+                                                            {" · "}{d.responsible}
+                                                            {" · "}{d.dueDate ?? d.due_date}
+                                                            {" · "}{d.priority} / {d.status}
+                                                        </li>
+                                                    ))}
+                                                </ul>
+                                            )}
+                                        </div>
+                                    ))}
+                                </div>
+                            ) : (
+                                <pre className="whitespace-pre-wrap text-sm text-neutral-700">
+                                    {charter.project_phases ?? charter.projectPhases}
+                                </pre>
+                            )}
                         </section>
 
                         <section className="card p-6" id="requirements">

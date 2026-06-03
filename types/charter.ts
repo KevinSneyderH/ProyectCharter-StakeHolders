@@ -1,4 +1,4 @@
-import { v4 as uuidv4 } from 'uuid'
+import { v4 as uuidv4 } from "uuid";
 // ─── Project Charter Types ────────────────────────────────────────────────────
 
 export interface VersionEntry {
@@ -35,6 +35,31 @@ export interface Risk {
   description: string;
 }
 
+export type PhaseStatus = "pending" | "in-progress" | "completed" | "delayed";
+export type DeliverablePriority = "alta" | "media" | "baja" | "critica";
+export type DeliverableStatus = "pendiente" | "en-revision" | "entregado" | "finalizado";
+
+export interface PhaseDeliverable {
+  id: string;
+  name: string;
+  responsible: string;
+  dueDate: string;
+  priority: DeliverablePriority;
+  status: DeliverableStatus;
+}
+
+export interface ProjectPhase {
+  id: string;
+  title: string;
+  description: string;
+  startDate: string;
+  endDate: string;
+  responsiblesCount: number;
+  status: PhaseStatus;
+  progress: number;
+  deliverables: PhaseDeliverable[];
+}
+
 export interface ProjectCharterFormData {
   // Paso 1 – Identificación
   projectName: string;
@@ -51,34 +76,38 @@ export interface ProjectCharterFormData {
   // Paso 4 – Definición del producto
   productDefinition: string;
   solutionArchitecture: string;
+
+  // Paso 5 – Fases y entregables
+  phases: ProjectPhase[];
+  /** Serializado para el API a partir de `phases` */
   projectPhases: string;
 
-  // Paso 5 – Requisitos
+  // Paso 6 – Requisitos
   sponsorRequirements: string;
   clientRequirements: string;
   functionalRequirements: string;
   nonFunctionalRequirements: string;
   qualityRequirements: string;
 
-  // Paso 6 – Objetivos (triple restricción)
+  // Paso 7 – Objetivos (triple restricción)
   objectives: Objective[];
 
-  // Paso 7 – Project Manager
+  // Paso 8 – Project Manager
   pmName: string;
   pmReportsTo: string;
   pmAuthority: string;
   pmSupervises: string;
 
-  // Paso 8 – Hitos
+  // Paso 9 – Hitos
   milestones: Milestone[];
 
-  // Paso 9 – Organizaciones
+  // Paso 10 – Organizaciones
   organizations: Organization[];
 
-  // Paso 10 – Riesgos
+  // Paso 11 – Riesgos
   risks: Risk[];
 
-  // Paso 11 – Presupuesto y Sponsor
+  // Paso 12 – Presupuesto y Sponsor
   totalBudget: string;
   sponsorName: string;
   sponsorCompany: string;
@@ -91,6 +120,7 @@ export type StepId =
   | "versiones"
   | "descripcion"
   | "producto"
+  | "fases"
   | "requisitos"
   | "objetivos"
   | "pm"
@@ -110,6 +140,7 @@ export const FORM_STEPS: FormStep[] = [
   { id: "versiones", label: "Control de versiones", shortLabel: "Versiones" },
   { id: "descripcion", label: "Descripción general", shortLabel: "Descripción" },
   { id: "producto", label: "Definición del producto", shortLabel: "Producto" },
+  { id: "fases", label: "Fases del proyecto", shortLabel: "Fases" },
   { id: "requisitos", label: "Requisitos del proyecto", shortLabel: "Requisitos" },
   { id: "objetivos", label: "Objetivos del proyecto", shortLabel: "Objetivos" },
   { id: "pm", label: "Project Manager", shortLabel: "PM" },
@@ -138,6 +169,7 @@ export const DEFAULT_FORM_VALUES: ProjectCharterFormData = {
   duration: "",
   productDefinition: "",
   solutionArchitecture: "",
+  phases: [],
   projectPhases: "",
   sponsorRequirements: "",
   clientRequirements: "",
